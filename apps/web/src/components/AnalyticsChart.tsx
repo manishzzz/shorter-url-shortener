@@ -18,25 +18,26 @@ export default function AnalyticsChart({
       <AreaChart data={data}>
         <defs>
           <linearGradient id="timelineFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#1b4d66" stopOpacity={0.34} />
-            <stop offset="95%" stopColor="#1b4d66" stopOpacity={0.04} />
+            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.6} />
+            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
           </linearGradient>
         </defs>
-        <CartesianGrid stroke="rgba(31,36,48,0.1)" vertical={false} />
-        <XAxis dataKey="date" stroke="#6c7382" tickLine={false} axisLine={false} />
-        <YAxis stroke="#6c7382" allowDecimals={false} tickLine={false} axisLine={false} />
+        <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+        <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={false} />
+        <YAxis stroke="#94a3b8" allowDecimals={false} tickLine={false} axisLine={false} />
         <Tooltip
           contentStyle={{
             borderRadius: "18px",
-            border: "1px solid rgba(31,36,48,0.12)",
-            boxShadow: "0 20px 48px rgba(34,35,38,0.12)",
-            background: "rgba(255,253,248,0.96)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            boxShadow: "0 20px 48px rgba(0,0,0,0.5)",
+            background: "rgba(20,20,28,0.9)",
           }}
-          labelStyle={{ color: "#1f2430", fontWeight: 700 }}
-          itemStyle={{ color: "#1b4d66" }}
+          labelStyle={{ color: "#f8fafc", fontWeight: 700 }}
+          itemStyle={{ color: "#c4b5fd" }}
         />
-        <Area type="monotone" dataKey="clicks" stroke="#1b4d66" strokeWidth={2.2} fill="url(#timelineFill)" />
+        <Area type="monotone" dataKey="clicks" stroke="#8b5cf6" strokeWidth={3} fill="url(#timelineFill)" />
       </AreaChart>
     </ResponsiveContainer>
   );
 }
+
