@@ -18,24 +18,25 @@ export default function AnalyticsChart({
       <AreaChart data={data}>
         <defs>
           <linearGradient id="timelineFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.6} />
-            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
+            <stop offset="5%" stopColor="#ccff00" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="#ccff00" stopOpacity={0.0} />
           </linearGradient>
         </defs>
-        <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-        <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={false} />
-        <YAxis stroke="#94a3b8" allowDecimals={false} tickLine={false} axisLine={false} />
+        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="date" stroke="#a1a1aa" tickLine={false} axisLine={false} />
+        <YAxis stroke="#a1a1aa" allowDecimals={false} tickLine={false} axisLine={false} />
         <Tooltip
           contentStyle={{
-            borderRadius: "18px",
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow: "0 20px 48px rgba(0,0,0,0.5)",
-            background: "rgba(20,20,28,0.9)",
+            borderRadius: "12px",
+            border: "1px solid #3f3f46",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.8)",
+            background: "#0a0a0a",
+            fontFamily: "Space Grotesk, sans-serif"
           }}
-          labelStyle={{ color: "#f8fafc", fontWeight: 700 }}
-          itemStyle={{ color: "#c4b5fd" }}
+          labelStyle={{ color: "#ffffff", fontWeight: 700 }}
+          itemStyle={{ color: "#ccff00", fontWeight: 600 }}
         />
-        <Area type="monotone" dataKey="clicks" stroke="#8b5cf6" strokeWidth={3} fill="url(#timelineFill)" />
+        <Area type="monotone" dataKey="clicks" stroke="#ccff00" strokeWidth={3} fill="url(#timelineFill)" />
       </AreaChart>
     </ResponsiveContainer>
   );
