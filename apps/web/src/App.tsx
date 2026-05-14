@@ -57,12 +57,16 @@ function HomePage() {
         customAlias: customAlias.trim() || undefined,
       });
 
-      setResult(response);
+      const normalizedShortUrl = resolveShortLink(response.code);
+      setResult({
+        ...response,
+        shortUrl: normalizedShortUrl,
+      });
       persistRecentLinks(
         [
           {
             code: response.code,
-            shortUrl: response.shortUrl,
+            shortUrl: normalizedShortUrl,
             originalUrl: url,
             createdAt: new Date().toISOString(),
           },
