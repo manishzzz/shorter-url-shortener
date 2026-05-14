@@ -47,10 +47,10 @@ services:
     name: shorter-web
     runtime: docker
     dockerfilePath: ./apps/web/Dockerfile
-    dockerBuildArgs:
-      - name: VITE_API_BASE_URL
+    envVars:
+      - key: VITE_API_BASE_URL
         value: https://shorter-api.onrender.com
-      - name: VITE_SHORT_BASE_URL
+      - key: VITE_SHORT_BASE_URL
         value: https://shorter-web.onrender.com
 
   - type: keyvalue
