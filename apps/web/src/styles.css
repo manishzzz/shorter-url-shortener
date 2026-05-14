@@ -124,14 +124,16 @@ input {
 }
 
 .actions,
-.result-actions {
+.result-actions,
+.recent-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
 button,
-.result-actions a {
+.result-actions a,
+.recent-actions a {
   border: none;
   border-radius: 999px;
   padding: 14px 20px;
@@ -147,13 +149,20 @@ button {
 }
 
 button:hover,
-.result-actions a:hover {
+.result-actions a:hover,
+.recent-actions a:hover {
   transform: translateY(-2px);
 }
 
 button.ghost {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text);
+}
+
+button.small,
+.recent-actions a {
+  padding: 10px 14px;
+  font-size: 0.92rem;
 }
 
 .result-card {
@@ -163,8 +172,20 @@ button.ghost {
   border: 1px solid var(--line);
 }
 
+.recent-card {
+  border-radius: 22px;
+  padding: 20px;
+  background: rgba(14, 17, 31, 0.8);
+  border: 1px solid var(--line);
+}
+
 .result-card p,
 .panel span {
+  color: var(--muted);
+}
+
+.recent-card p,
+.recent-row span {
   color: var(--muted);
 }
 
@@ -172,6 +193,45 @@ button.ghost {
 .panel strong {
   margin: 6px 0 10px;
   font-size: 2rem;
+}
+
+.recent-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.recent-head h3 {
+  margin: 6px 0 0;
+  font-size: 1.2rem;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.recent-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.recent-row strong,
+.recent-row span {
+  display: block;
+}
+
+.recent-row span {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .analytics-shell {
@@ -241,5 +301,14 @@ button.ghost {
 
   .hero-copy {
     padding: 28px;
+  }
+
+  .recent-head,
+  .recent-row {
+    flex-direction: column;
+  }
+
+  .recent-row span {
+    max-width: 100%;
   }
 }
