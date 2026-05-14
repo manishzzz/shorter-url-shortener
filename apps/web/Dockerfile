@@ -3,8 +3,10 @@ WORKDIR /app
 
 RUN corepack enable
 
-ARG VITE_API_BASE_URL=http://localhost:4000
+ARG VITE_API_BASE_URL=https://shorter-api-5vxk.onrender.com
+ARG VITE_SHORT_BASE_URL=https://shorter-api-5vxk.onrender.com
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_SHORT_BASE_URL=$VITE_SHORT_BASE_URL
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/web/package.json apps/web/package.json
