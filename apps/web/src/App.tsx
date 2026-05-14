@@ -1,4 +1,4 @@
-import { FormEvent, Suspense, lazy, useEffect, useState } from "react";
+import { FormEvent, Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { Link, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { fetchAnalytics, resolveShortLink, shortenUrl, type AnalyticsResponse } from "./api";
 
@@ -12,6 +12,71 @@ type RecentLink = {
   createdAt: string;
 };
 
+const productNotes = [
+  "301 redirects with async click capture",
+  "Per-IP rate limiting tuned for public traffic",
+  "Redis hot-path caching for popular destinations",
+];
+
+const shortUrlPreviewNotes = [
+  "The live demo uses a temporary tunnel host, so the domain reads longer than a production custom domain.",
+  "What matters in the product is the short code and the redirect behavior. A branded domain makes the final URL feel properly compact.",
+];
+
+function truncateMiddle(value: string, start = 34, end = 18) {
+  if (value.length <= start + end + 3) {
+    return value;
+  }
+
+  return `${value.slice(0, start)}...${value.slice(-end)}`;
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function getHostname(value: string) {
+  try {
+    return new URL(value).host;
+  } catch {
+    return value;
+  }
+}
+
+function Surface({
+  title,
+  eyebrow,
+  actions,
+  children,
+  className = "",
+}: {
+  title?: string;
+  eyebrow?: string;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`surface ${className}`.trim()}>
+      {title || eyebrow || actions ? (
+        <header className="surface-head">
+          <div>
+            {eyebrow ? <p className="surface-eyebrow">{eyebrow}</p> : null}
+            {title ? <h2>{title}</h2> : null}
+          </div>
+          {actions ? <div className="surface-actions">{actions}</div> : null}
+        </header>
+      ) : null}
+      {children}
+    </section>
+  );
+}
+
 function HomePage() {
   const [url, setUrl] = useState("");
   const [customAlias, setCustomAlias] = useState("");
@@ -21,6 +86,11 @@ function HomePage() {
   const [copyState, setCopyState] = useState<string | null>(null);
   const [recentLinks, setRecentLinks] = useState<RecentLink[]>([]);
   const navigate = useNavigate();
+
+  const shortHost = useMemo(
+    () => (result ? getHostname(result.shortUrl) : getHostname(resolveShortLink("demo"))),
+    [result],
+  );
 
   useEffect(() => {
     const stored = window.localStorage.getItem(RECENT_LINKS_KEY);
@@ -81,103 +151,171 @@ function HomePage() {
   };
 
   return (
-    <main className="page-shell">
-      <section className="hero-card">
-        <div className="hero-copy">
-          <p className="eyebrow">Ship links that feel branded</p>
-          <h1>
-            Shorter turns heavy links into
-            <span> fast little flexes.</span>
-          </h1>
-          <p className="subcopy">
-            Production-grade URL shortening with analytics, async click logging, Redis hot-path
-            caching, and a front-end that feels modern instead of template-y.
-          </p>
-        </div>
-
-        <form className="shorten-form" onSubmit={onSubmit}>
-          <label>
-            Destination URL
-            <input
-              placeholder="https://your-long-link.com/something-really-big"
-              type="url"
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-              required
-            />
-          </label>
-
-          <label>
-            Custom alias
-            <input
-              placeholder="drop-v1"
-              value={customAlias}
-              onChange={(event) => setCustomAlias(event.target.value)}
-            />
-          </label>
-
-          <div className="actions">
-            <button type="submit" disabled={loading}>
-              {loading ? "Cooking..." : "Create short link"}
-            </button>
-            <button type="button" className="ghost" onClick={() => navigate("/analytics/demo")}>
-              Preview analytics view
-            </button>
-          </div>
-
-          {error ? <p className="error-text">{error}</p> : null}
-
-          {result ? (
-            <div className="result-card">
-              <p>Short code</p>
-              <h2>{result.code}</h2>
-              <a href={result.shortUrl} target="_blank" rel="noreferrer">
-                {result.shortUrl}
-              </a>
-              <div className="result-actions">
-                <button type="button" onClick={() => copyToClipboard(result.shortUrl, "Fresh link copied")}>
-                  {copyState === "Fresh link copied" ? "Copied" : "Copy link"}
-                </button>
-                <Link to={`/analytics/${result.code}`}>View analytics</Link>
-              </div>
+    <main className="app-shell">
+      <div className="page-frame">
+        <header className="topbar">
+          <div className="brand-lockup">
+            <div className="brand-mark">S</div>
+            <div>
+              <p className="brand-name">Shorter</p>
+              <span>Link infrastructure with analytics</span>
             </div>
-          ) : null}
+          </div>
+          <div className="topbar-meta">
+            <span>Public demo</span>
+            <span>{shortHost}</span>
+          </div>
+        </header>
 
-          {recentLinks.length > 0 ? (
-            <div className="recent-card">
-              <div className="recent-head">
-                <div>
-                  <p>Recent drops</p>
-                  <h3>Your latest links, ready to share again.</h3>
+        <section className="hero-grid">
+          <div className="hero-panel">
+            <p className="kicker">Professional URL management</p>
+            <h1>Clean links, credible analytics, and a front end that behaves like a real product.</h1>
+            <p className="hero-text">
+              The live demo host is temporary, but the application behavior is production-shaped:
+              branded aliases, redirect tracking, Redis acceleration, and a backend built for real
+              traffic patterns.
+            </p>
+
+            <div className="hero-notes">
+              {productNotes.map((item) => (
+                <div key={item} className="note-chip">
+                  {item}
                 </div>
-                <button type="button" className="ghost small" onClick={() => persistRecentLinks([])}>
-                  Clear
-                </button>
-              </div>
+              ))}
+            </div>
 
-              <div className="recent-list">
-                {recentLinks.map((item) => (
-                  <div key={item.code} className="recent-row">
-                    <div>
-                      <strong>/{item.code}</strong>
-                      <span>{item.originalUrl}</span>
-                    </div>
-                    <div className="recent-actions">
-                      <button type="button" className="ghost small" onClick={() => copyToClipboard(item.shortUrl, item.code)}>
-                        {copyState === item.code ? "Copied" : "Copy"}
-                      </button>
-                      <a href={item.shortUrl} target="_blank" rel="noreferrer">
-                        Open
-                      </a>
-                      <Link to={`/analytics/${item.code}`}>Stats</Link>
-                    </div>
-                  </div>
+            <Surface eyebrow="Why the link looks long" title="This is a host issue, not a short-code issue.">
+              <div className="explain-list">
+                {shortUrlPreviewNotes.map((item) => (
+                  <p key={item}>{item}</p>
                 ))}
               </div>
+            </Surface>
+          </div>
+
+          <Surface className="composer-panel" eyebrow="Create link" title="Publish a short URL">
+            <form className="composer-form" onSubmit={onSubmit}>
+              <label>
+                Destination URL
+                <input
+                  placeholder="https://your-long-link.com/something-important"
+                  type="url"
+                  value={url}
+                  onChange={(event) => setUrl(event.target.value)}
+                  required
+                />
+              </label>
+
+              <label>
+                Custom alias
+                <input
+                  placeholder="spring-launch"
+                  value={customAlias}
+                  onChange={(event) => setCustomAlias(event.target.value)}
+                />
+              </label>
+
+              <div className="button-row">
+                <button type="submit" disabled={loading}>
+                  {loading ? "Generating..." : "Create short link"}
+                </button>
+                <button type="button" className="button-secondary" onClick={() => navigate("/analytics/demo")}>
+                  Open sample analytics
+                </button>
+              </div>
+
+              {error ? <p className="feedback error-text">{error}</p> : null}
+
+              {result ? (
+                <div className="launch-card">
+                  <div className="launch-card-head">
+                    <div>
+                      <p className="surface-eyebrow">Ready to share</p>
+                      <h3>/{result.code}</h3>
+                    </div>
+                    <span className="host-pill">{getHostname(result.shortUrl)}</span>
+                  </div>
+
+                  <div className="launch-grid">
+                    <div>
+                      <span className="metric-label">Short code</span>
+                      <strong className="metric-value">/{result.code}</strong>
+                    </div>
+                    <div>
+                      <span className="metric-label">Full URL</span>
+                      <strong className="metric-value compact-url">
+                        {truncateMiddle(result.shortUrl, 28, 16)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="button-row">
+                    <button
+                      type="button"
+                      className="button-secondary"
+                      onClick={() => copyToClipboard(result.shortUrl, "fresh-link")}
+                    >
+                      {copyState === "fresh-link" ? "Copied" : "Copy URL"}
+                    </button>
+                    <a className="button-link" href={result.shortUrl} target="_blank" rel="noreferrer">
+                      Open redirect
+                    </a>
+                    <Link className="button-link subtle" to={`/analytics/${result.code}`}>
+                      View analytics
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
+            </form>
+          </Surface>
+        </section>
+
+        <Surface
+          eyebrow="Recent links"
+          title="Latest published codes"
+          actions={
+            recentLinks.length > 0 ? (
+              <button type="button" className="button-secondary button-small" onClick={() => persistRecentLinks([])}>
+                Clear list
+              </button>
+            ) : null
+          }
+        >
+          {recentLinks.length === 0 ? (
+            <p className="empty-state">Create a link and it will appear here for quick reuse.</p>
+          ) : (
+            <div className="link-table">
+              {recentLinks.map((item) => (
+                <article key={item.code} className="link-row">
+                  <div className="link-row-main">
+                    <strong>/{item.code}</strong>
+                    <span>{truncateMiddle(item.originalUrl, 58, 18)}</span>
+                  </div>
+                  <div className="link-row-meta">
+                    <span>{formatDateTime(item.createdAt)}</span>
+                    <div className="row-actions">
+                      <button
+                        type="button"
+                        className="button-secondary button-small"
+                        onClick={() => copyToClipboard(item.shortUrl, item.code)}
+                      >
+                        {copyState === item.code ? "Copied" : "Copy"}
+                      </button>
+                      <a className="button-link button-small" href={item.shortUrl} target="_blank" rel="noreferrer">
+                        Open
+                      </a>
+                      <Link className="button-link subtle button-small" to={`/analytics/${item.code}`}>
+                        Analytics
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
-          ) : null}
-        </form>
-      </section>
+          )}
+        </Surface>
+      </div>
     </main>
   );
 }
@@ -205,61 +343,92 @@ function AnalyticsPage() {
   }, [code]);
 
   return (
-    <main className="page-shell">
-      <section className="analytics-shell">
-        <div className="analytics-header">
-          <Link to="/">Back home</Link>
-          <h1>Analytics for /{code}</h1>
-          <p>Track redirect velocity, referral spread, and whether your short link is actually moving.</p>
-        </div>
+    <main className="app-shell">
+      <div className="page-frame analytics-frame">
+        <header className="analytics-hero">
+          <div>
+            <Link className="back-link" to="/">
+              Back to composer
+            </Link>
+            <p className="kicker">Performance view</p>
+            <h1>Analytics for /{code}</h1>
+            <p className="hero-text analytics-copy">
+              A cleaner read on traffic volume, redirect activity, and where visits are coming
+              from.
+            </p>
+          </div>
+          {analytics ? (
+            <div className="hero-sidecard">
+              <span className="metric-label">Live URL host</span>
+              <strong>{getHostname(resolveShortLink(analytics.code))}</strong>
+              <p>{truncateMiddle(resolveShortLink(analytics.code), 34, 16)}</p>
+            </div>
+          ) : null}
+        </header>
 
-        {loading ? <div className="panel">Loading analytics...</div> : null}
-        {error ? <div className="panel error-text">{error}</div> : null}
+        {loading ? <Surface className="status-surface">Loading analytics...</Surface> : null}
+        {error ? <Surface className="status-surface error-text">{error}</Surface> : null}
 
         {analytics ? (
           <>
-            <div className="stats-grid">
-              <article className="panel">
-                <span>Total clicks</span>
-                <strong>{analytics.clickCount}</strong>
-              </article>
-              <article className="panel">
-                <span>Destination</span>
-                <strong>{analytics.originalUrl}</strong>
-              </article>
-              <article className="panel">
-                <span>Short link</span>
-                <strong>{resolveShortLink(analytics.code)}</strong>
-              </article>
-            </div>
+            <section className="analytics-summary">
+              <Surface className="summary-card" eyebrow="Traffic" title={String(analytics.clickCount)}>
+                <p>Total recorded clicks</p>
+              </Surface>
+              <Surface className="summary-card" eyebrow="Short code" title={`/${analytics.code}`}>
+                <p>{truncateMiddle(resolveShortLink(analytics.code), 30, 14)}</p>
+              </Surface>
+              <Surface className="summary-card" eyebrow="Destination" title={getHostname(analytics.originalUrl)}>
+                <p>{truncateMiddle(analytics.originalUrl, 38, 18)}</p>
+              </Surface>
+            </section>
 
-            <div className="chart-panel">
-              <div className="panel-head">
-                <h2>Timeline</h2>
-                <span>Daily clicks</span>
-              </div>
-              <Suspense fallback={<div className="chart-fallback">Loading chart...</div>}>
-                <AnalyticsChart data={analytics.timeline} />
-              </Suspense>
-            </div>
+            <section className="analytics-layout">
+              <Surface className="timeline-surface" eyebrow="Timeline" title="Daily click pattern">
+                <Suspense fallback={<div className="chart-fallback">Loading chart...</div>}>
+                  <AnalyticsChart data={analytics.timeline} />
+                </Suspense>
+              </Surface>
 
-            <div className="panel">
-              <div className="panel-head">
-                <h2>Top referrers</h2>
-              </div>
-              <div className="referrer-list">
-                {analytics.topReferrers.length === 0 ? <p>No click data yet.</p> : null}
-                {analytics.topReferrers.map((item) => (
-                  <div key={item.referrer} className="referrer-row">
-                    <span>{item.referrer}</span>
-                    <strong>{item.clicks}</strong>
+              <div className="analytics-side">
+                <Surface eyebrow="Referrers" title="Top sources">
+                  <div className="referrer-list">
+                    {analytics.topReferrers.length === 0 ? (
+                      <p className="empty-state">No referrer breakdown yet.</p>
+                    ) : (
+                      analytics.topReferrers.map((item) => (
+                        <div key={item.referrer} className="referrer-row">
+                          <span>{item.referrer}</span>
+                          <strong>{item.clicks}</strong>
+                        </div>
+                      ))
+                    )}
                   </div>
-                ))}
+                </Surface>
+
+                <Surface eyebrow="Lifecycle" title="Link details">
+                  <div className="detail-stack">
+                    <div className="detail-item">
+                      <span>Created</span>
+                      <strong>{formatDateTime(analytics.createdAt)}</strong>
+                    </div>
+                    <div className="detail-item">
+                      <span>Last accessed</span>
+                      <strong>
+                        {analytics.lastAccessedAt ? formatDateTime(analytics.lastAccessedAt) : "No visits yet"}
+                      </strong>
+                    </div>
+                    <div className="detail-item">
+                      <span>Redirect target</span>
+                      <strong>{truncateMiddle(analytics.originalUrl, 28, 16)}</strong>
+                    </div>
+                  </div>
+                </Surface>
               </div>
-            </div>
+            </section>
           </>
         ) : null}
-      </section>
+      </div>
     </main>
   );
 }
