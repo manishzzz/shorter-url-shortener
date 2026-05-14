@@ -1,6 +1,6 @@
 import { Prisma, prisma } from "../../../../../packages/database/src/index.js";
 import type { Redis } from "ioredis";
-import { getConfig } from "../../config.js";
+import { getConfig, getShortBaseUrl } from "../../config.js";
 import type { QueuedClickEvent } from "../../worker-types.js";
 import { buildTimeline, normalizeReferrers } from "./analytics.js";
 import { PopularUrlCache } from "./cache.js";
@@ -42,7 +42,7 @@ export class ShortenerService {
 
       return {
         code: shortUrl.code,
-        shortUrl: `${getConfig().API_BASE_URL}/${shortUrl.code}`,
+        shortUrl: `${getShortBaseUrl()}/${shortUrl.code}`,
       };
     } catch (error) {
       if (

@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
+const SHORT_BASE_URL = (import.meta.env.VITE_SHORT_BASE_URL ?? API_BASE_URL).replace(/\/$/, "");
 
 export type ShortenResponse = {
   code: string;
@@ -38,4 +39,4 @@ export const shortenUrl = async (input: { url: string; customAlias?: string }) =
 export const fetchAnalytics = async (code: string) =>
   handleResponse<AnalyticsResponse>(await fetch(`${API_BASE_URL}/analytics/${code}`));
 
-export const resolveShortLink = (code: string) => `${API_BASE_URL}/${code}`;
+export const resolveShortLink = (code: string) => `${SHORT_BASE_URL}/${code}`;

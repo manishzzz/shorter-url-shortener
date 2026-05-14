@@ -10,6 +10,8 @@ services:
         value: "4000"
       - key: API_BASE_URL
         sync: false
+      - key: SHORT_BASE_URL
+        sync: false
       - key: WEB_BASE_URL
         sync: false
       - key: DATABASE_URL
@@ -48,6 +50,8 @@ services:
     dockerBuildArgs:
       - name: VITE_API_BASE_URL
         value: https://shorter-api.onrender.com
+      - name: VITE_SHORT_BASE_URL
+        value: https://shorter-web.onrender.com
 
 databases:
   - name: shorter-postgres

@@ -2,6 +2,27 @@
 
 Shorter is a production-style URL shortener with a Redis-accelerated redirect path, asynchronous click logging, analytics, rate limiting, Dockerized local infrastructure, and a polished React frontend.
 
+## How Short Links Work
+
+Commercial shorteners such as Bitly, Dub, and Rebrandly do **not** create a bare word by itself. They create a link in the form:
+
+```text
+short-domain/alias
+```
+
+Examples:
+
+- `bit.ly/summer-sale`
+- `dub.sh/acme`
+- `go.brand.com/demo`
+
+That means the truly user-facing part has two pieces:
+
+1. A short public domain
+2. A short back-half or alias
+
+If you see links like `http://localhost:4000/launch` in local development, the alias is already short. The part that still looks long is the development host. To avoid showing `localhost` to users, configure a real public short domain through `SHORT_BASE_URL` for the API and `VITE_SHORT_BASE_URL` for the web app.
+
 ## Features
 
 - `POST /shorten` accepts `{ "url": "...", "customAlias": "optional" }`
@@ -40,9 +61,30 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/shorter
 REDIS_URL=redis://localhost:6379
 API_PORT=4000
 API_BASE_URL=http://localhost:4000
+SHORT_BASE_URL=http://localhost:4000
 WEB_BASE_URL=http://localhost:3000
 POPULAR_CACHE_THRESHOLD=10
 CLICK_BATCH_SIZE=100
+```
+
+### Important URL Settings
+
+- `API_BASE_URL`: where the backend API is reachable
+- `SHORT_BASE_URL`: the public short-link domain users should see
+- `VITE_API_BASE_URL`: frontend-to-backend API origin
+- `VITE_SHORT_BASE_URL`: frontend display/copy domain for short links
+
+Example production-style setup:
+
+```env
+API_BASE_URL=https://api.yourapp.com
+SHORT_BASE_URL=https://go.yourbrand.com
+WEB_BASE_URL=https://app.yourapp.com
+```
+
+```env
+VITE_API_BASE_URL=https://api.yourapp.com
+VITE_SHORT_BASE_URL=https://go.yourbrand.com
 ```
 
 ## Run Locally
@@ -160,3 +202,4 @@ The repo includes [render.yaml](C:\Users\manis\Desktop\shorter\render.yaml), whi
 - Popular links are cached in Redis after they cross the popularity threshold.
 - Analytics timeline is aggregated per day from persisted click events.
 - The Docker API image runs `prisma migrate deploy` on startup before launching the Fastify server.
+- For a polished user-facing experience, point `SHORT_BASE_URL` at a dedicated short domain instead of your internal API host.

@@ -5,6 +5,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   API_PORT: z.coerce.number().int().positive().default(4000),
   API_BASE_URL: z.url().default("http://localhost:4000"),
+  SHORT_BASE_URL: z.url().optional(),
   WEB_BASE_URL: z.url().default("http://localhost:3000"),
   ALLOWED_ORIGINS: z.string().default(""),
   DATABASE_URL: z.string().min(1),
@@ -17,6 +18,10 @@ export type AppConfig = z.infer<typeof envSchema>;
 
 let cachedConfig: AppConfig | null = null;
 
+export const resetConfigCache = () => {
+  cachedConfig = null;
+};
+
 export const getConfig = (): AppConfig => {
   cachedConfig ??= envSchema.parse(process.env);
   return cachedConfig;
@@ -28,4 +33,9 @@ export const getAllowedOrigins = () => {
   return Array.from(
     new Set([config.WEB_BASE_URL, ...parseAllowedOrigins(config.ALLOWED_ORIGINS)]),
   );
+};
+
+export const getShortBaseUrl = () => {
+  const config = getConfig();
+  return (config.SHORT_BASE_URL ?? config.API_BASE_URL).replace(/\/$/, "");
 };
