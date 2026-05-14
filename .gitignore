@@ -1,0 +1,14 @@
+node_modules
+.pnpm-store
+.turbo
+dist
+.next
+coverage
+.env
+.env.local
+*.log
+apps/api/prisma/dev.db
+apps/api/prisma/dev.db-journal
+packages/database/prisma/dev.db
+packages/database/prisma/dev.db-journal
+packages/database/src/generated

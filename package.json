@@ -1,0 +1,25 @@
+{
+  "name": "shorter",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@11.1.1",
+  "scripts": {
+    "build": "corepack pnpm -r build",
+    "dev": "corepack pnpm --parallel --filter @shorter/api --filter @shorter/worker --filter @shorter/web dev",
+    "test": "corepack pnpm -r test",
+    "lint": "corepack pnpm -r lint",
+    "format": "prettier --write .",
+    "db:generate": "corepack pnpm --filter @shorter/database prisma:generate",
+    "db:migrate": "corepack pnpm --filter @shorter/database prisma:migrate",
+    "db:deploy": "corepack pnpm --filter @shorter/database prisma:deploy"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "esbuild", "prisma"]
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3"
+  }
+}
