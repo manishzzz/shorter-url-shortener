@@ -2,8 +2,9 @@ import cors from "@fastify/cors";
 import sensible from "@fastify/sensible";
 import Fastify from "fastify";
 import { ZodError } from "zod";
-import { getConfig } from "./config.js";
+import { getAllowedOrigins, getConfig } from "./config.js";
 import { getRedis } from "./lib/redis.js";
+import { isAllowedOrigin } from "./lib/origins.js";
 import {
   AliasConflictError,
   ShortCodeNotFoundError,
@@ -13,6 +14,7 @@ import { shortenUrlSchema } from "./modules/shortener/schema.js";
 
 export const buildApp = () => {
   const config = getConfig();
+  const allowedOrigins = getAllowedOrigins();
   const redis = getRedis();
   const shortenerService = new ShortenerService(redis);
   const app = Fastify({
@@ -21,7 +23,14 @@ export const buildApp = () => {
 
   app.register(sensible);
   app.register(cors, {
-    origin: [config.WEB_BASE_URL],
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      callback(null, isAllowedOrigin(origin, allowedOrigins) ? origin : false);
+    },
   });
 
   app.addHook("onRequest", async (request, reply) => {
