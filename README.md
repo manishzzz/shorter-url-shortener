@@ -65,6 +65,7 @@ SHORT_BASE_URL=http://localhost:4000
 WEB_BASE_URL=http://localhost:3000
 POPULAR_CACHE_THRESHOLD=10
 CLICK_BATCH_SIZE=100
+CLICK_LOG_MODE=queue
 ```
 
 ### Important URL Settings
@@ -73,6 +74,7 @@ CLICK_BATCH_SIZE=100
 - `SHORT_BASE_URL`: the public short-link domain users should see
 - `VITE_API_BASE_URL`: frontend-to-backend API origin
 - `VITE_SHORT_BASE_URL`: frontend display/copy domain for short links
+- `CLICK_LOG_MODE`: `queue` for worker-based async logging, or `inline` when deploying without a separate worker
 
 Example production-style setup:
 
@@ -203,3 +205,4 @@ The repo includes [render.yaml](C:\Users\manis\Desktop\shorter\render.yaml), whi
 - Analytics timeline is aggregated per day from persisted click events.
 - The Docker API image runs `prisma migrate deploy` on startup before launching the Fastify server.
 - For a polished user-facing experience, point `SHORT_BASE_URL` at a dedicated short domain instead of your internal API host.
+- If your platform does not support a separate worker on the free plan, set `CLICK_LOG_MODE=inline` so the API writes click analytics directly.

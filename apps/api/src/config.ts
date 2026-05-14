@@ -12,6 +12,7 @@ const envSchema = z.object({
   REDIS_URL: z.string().min(1),
   POPULAR_CACHE_THRESHOLD: z.coerce.number().int().positive().default(10),
   CLICK_BATCH_SIZE: z.coerce.number().int().positive().default(100),
+  CLICK_LOG_MODE: z.enum(["queue", "inline"]).default("queue"),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;

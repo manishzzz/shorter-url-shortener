@@ -23,9 +23,10 @@ export class ShortCodeNotFoundError extends Error {
 
 export class ShortenerService {
   private readonly cache: PopularUrlCache;
+  private readonly config = getConfig();
 
   constructor(private readonly redis: Redis) {
-    this.cache = new PopularUrlCache(redis, getConfig().POPULAR_CACHE_THRESHOLD);
+    this.cache = new PopularUrlCache(redis, this.config.POPULAR_CACHE_THRESHOLD);
   }
 
   async createShortUrl(input: ShortenUrlInput) {
@@ -83,6 +84,15 @@ export class ShortenerService {
   }
 
   async queueClick(code: string, payload: Omit<QueuedClickEvent, "code" | "clickedAt">) {
+    if (this.config.CLICK_LOG_MODE === "inline") {
+      await this.persistClick({
+        code,
+        clickedAt: new Date().toISOString(),
+        ...payload,
+      });
+      return;
+    }
+
     await this.redis.lpush(
       CLICK_QUEUE_KEY,
       JSON.stringify({
@@ -95,6 +105,38 @@ export class ShortenerService {
 
   async warmPopularCache(code: string, originalUrl: string) {
     await this.cache.markHit(code, originalUrl);
+  }
+
+  private async persistClick(event: QueuedClickEvent) {
+    const shortUrl = await prisma.shortUrl.findUnique({
+      where: { code: event.code },
+      select: { id: true },
+    });
+
+    if (!shortUrl) {
+      return;
+    }
+
+    await prisma.$transaction([
+      prisma.clickEvent.create({
+        data: {
+          shortUrlId: shortUrl.id,
+          clickedAt: new Date(event.clickedAt),
+          ipAddress: event.ipAddress,
+          userAgent: event.userAgent,
+          referrer: event.referrer,
+        },
+      }),
+      prisma.shortUrl.update({
+        where: { code: event.code },
+        data: {
+          clickCount: {
+            increment: 1,
+          },
+          lastAccessedAt: new Date(event.clickedAt),
+        },
+      }),
+    ]);
   }
 
   async getAnalytics(code: string) {

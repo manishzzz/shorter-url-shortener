@@ -78,6 +78,7 @@ The frontend is a React + Vite app that provides:
 - `SHORT_BASE_URL`: what users should see in the short link
 - `WEB_BASE_URL`: where the frontend lives
 - `ALLOWED_ORIGINS`: extra CORS origins if needed
+- `CLICK_LOG_MODE`: `queue` for worker-based processing or `inline` for single-service deployments
 
 ### Web-side
 
@@ -165,6 +166,7 @@ Returns:
 - analytics writes are decoupled through Redis
 - popular URLs are cached for faster repeat resolution
 - the system is suitable for local Docker use and can be adapted to cloud deployment with a proper public domain
+- for hosts that do not allow a free background worker, the API can run in `CLICK_LOG_MODE=inline` and persist clicks directly
 
 ## Summary
 
