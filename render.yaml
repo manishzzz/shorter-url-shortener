@@ -20,7 +20,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: shorter-redis
           property: connectionString
 
@@ -39,7 +39,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: shorter-redis
           property: connectionString
 
@@ -53,10 +53,10 @@ services:
       - name: VITE_SHORT_BASE_URL
         value: https://shorter-web.onrender.com
 
-databases:
-  - name: shorter-postgres
+  - type: keyvalue
+    name: shorter-redis
     plan: free
 
-  - name: shorter-redis
-    type: redis
+databases:
+  - name: shorter-postgres
     plan: free
